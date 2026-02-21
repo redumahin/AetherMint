@@ -10,6 +10,16 @@ mod progress_test;
 mod event_logger_test;
 #[cfg(test)]
 mod user_profile_test;
+pub mod eventLogger;
+pub mod courseMetadata;
+pub mod syncCoordination;
+#[cfg(test)]
+mod progress_test;
+#[cfg(test)]
+mod courseMetadata_test;
+#[cfg(test)]
+mod syncCoordination_test;
+
 
 #[contracttype]
 pub enum DataKey {
