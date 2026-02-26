@@ -8,12 +8,15 @@ mod credentials_test;
 pub mod progress;
 pub mod event_logger;
 pub mod user_profile;
+pub mod analyticsStorage;
 #[cfg(test)]
 mod progress_test;
 #[cfg(test)]
 mod event_logger_test;
 #[cfg(test)]
 mod user_profile_test;
+#[cfg(test)]
+mod analyticsStorage_test;
 pub mod eventLogger;
 pub mod courseMetadata;
 pub mod syncCoordination;
