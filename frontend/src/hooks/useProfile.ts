@@ -243,7 +243,8 @@ export const useProfile = () => {
       id: Date.now().toString()
     };
 
-    const updatedCredentials = [...credentials, newCredential];
+    const creds = credentials || [];
+    const updatedCredentials = [...creds, newCredential];
     await updateCredentials(updatedCredentials);
 
     return newCredential;
@@ -251,7 +252,8 @@ export const useProfile = () => {
 
   // Update credential verification status
   const updateCredentialStatus = useCallback(async (credentialId: string, status: Credential['verificationStatus']) => {
-    const updatedCredentials = credentials.map(cred => 
+    const creds = credentials || [];
+    const updatedCredentials = creds.map(cred => 
       cred.id === credentialId ? { ...cred, verificationStatus: status } : cred
     );
     await updateCredentials(updatedCredentials);
@@ -259,7 +261,8 @@ export const useProfile = () => {
 
   // Update achievement progress
   const updateAchievementProgress = useCallback(async (achievementId: string, progress: AchievementProgress) => {
-    const updatedAchievements = achievements.map(achievement => 
+    const achs = achievements || [];
+    const updatedAchievements = achs.map(achievement => 
       achievement.id === achievementId 
         ? { 
             ...achievement, 
@@ -274,13 +277,16 @@ export const useProfile = () => {
   // Refresh stats
   const refreshStats = useCallback(async () => {
     try {
+      const achs = achievements || [];
+      const creds = credentials || [];
+      
       const newStats: ProfileStats = {
         ...MOCK_STATS,
-        completedCourses: achievements.filter(a => a.earnedDate && a.category === 'learning').length,
-        verifiedCredentials: credentials.filter(c => c.verificationStatus === 'verified').length,
-        pendingCredentials: credentials.filter(c => c.verificationStatus === 'pending').length,
-        totalAchievements: achievements.filter(a => a.earnedDate).length,
-        rareAchievements: achievements.filter(a => a.earnedDate && ['epic', 'legendary'].includes(a.rarity)).length
+        completedCourses: achs.filter(a => a.earnedDate && a.category === 'learning').length,
+        verifiedCredentials: creds.filter(c => c.verificationStatus === 'verified').length,
+        pendingCredentials: creds.filter(c => c.verificationStatus === 'pending').length,
+        totalAchievements: achs.filter(a => a.earnedDate).length,
+        rareAchievements: achs.filter(a => a.earnedDate && ['epic', 'legendary'].includes(a.rarity)).length
       };
 
       setStats(newStats);
@@ -298,7 +304,9 @@ export const useProfile = () => {
 
   // Refresh stats when achievements or credentials change
   useEffect(() => {
-    if (achievements.length > 0 || credentials.length > 0) {
+    const achs = achievements || [];
+    const creds = credentials || [];
+    if (achs.length > 0 || creds.length > 0) {
       refreshStats();
     }
   }, [achievements, credentials, refreshStats]);
