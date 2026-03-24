@@ -24,6 +24,8 @@ const eventLoggerRoutes = resolveRoute(require('./routes/eventLoggerRoutes'));
 const syncRoutes = resolveRoute(require('./routes/syncRoutes'));
 const contentRoutes = require('./routes/content');
 const transactionRoutes = require('./routes/transactions');
+const acoRoutes = require('./routes/aco');
+const federatedLearningRoutes = require('./routes/federatedLearning');
 
 
 // Initialize Express app
@@ -63,7 +65,8 @@ app.use('/api/sync', syncRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/rbac', rbacRoutes);
 app.use('/api/transactions', transactionRoutes);
-app.use('/api/cdn', cdnOptimizationRoutes);
+app.use('/api/aco', acoRoutes);
+app.use('/api/federated-learning', federatedLearningRoutes);
 
 
 // Root endpoint
@@ -120,14 +123,8 @@ const transactionProcessor = require('./workers/transactionProcessor');
 const transactionEvents = require('./events/transactionEvents');
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 AetherMint Education Backend running on port ${PORT}`);
-  console.log(`📚 Quiz Management API available at /api/quizzes`);
-  console.log(`📊 Event Logger API available at /api/events`);
-  console.log(`🔄 Sync API available at /api/sync`);
-  console.log(`⚡ Transaction Queue API available at /api/transactions`);
-  console.log(`🌐 CDN Optimization API available at /api/cdn`);
-  console.log(`🏥 Health check available at /api/health`);
+
+
 });
 
 process.on('SIGINT', async () => {
