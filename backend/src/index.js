@@ -13,6 +13,7 @@ const syncRoutes = require('./routes/syncRoutes');
 const contentRoutes = require('./routes/content');
 const transactionRoutes = require('./routes/transactions');
 const federatedLearningRoutes = require('./routes/federatedLearningRoutes');
+const consciousnessController = require('./consciousnessController');
 
 // Initialize Express app
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api/sync', syncRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/federated-learning', federatedLearningRoutes);
+app.use('/api/consciousness', consciousnessController);
 
 // Root endpoint
 app.get('/', (req, res) => {
