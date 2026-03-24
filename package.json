@@ -38,6 +38,27 @@
     "nodemon": "^3.0.1",
     "supertest": "^6.3.3"
   },
+  "keywords": [
+    "stellar",
+    "blockchain",
+    "education",
+    "credentials",
+    "soroban",
+    "web3",
+    "decentralized",
+    "learning",
+    "certificates"
+  ],
+  "author": "jobbykings",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akordavid373/aethermint-education.git"
+  },
+  "bugs": {
+    "url": "https://github.com/akordavid373/aethermint-education/issues"
+  },
+  "homepage": "https://github.com/akordavid373/aethermint-education#readme",
   "workspaces": [
     "contracts",
     "backend",

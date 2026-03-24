@@ -16,6 +16,11 @@
     "test:ci": "jest --ci --coverage --watchAll=false",
     "test:verbose": "jest --verbose",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:api": "jest --testPathPattern=routes",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:performance": "jest --testPathPattern=performance",
+    "test:federated": "jest --testPathPattern=federatedLearning",
+    "test:all": "npm run test:ci && npm run test:api && npm run test:federated",
     "typecheck": "tsc --noEmit",
     "python:install": "pip install -r requirements.txt",
     "python:setup": "python -m spacy download en_core_web_sm"
@@ -37,14 +42,7 @@
     "pg": "^8.11.3",
     "redis": "^4.6.8",
     "socket.io": "^4.7.2",
-    "mongoose": "^7.5.0",
-    "express-validator": "^7.0.1",
-    "natural": "^6.5.0",
-    "compromise": "^14.10.0",
-    "uuid": "^9.0.0",
-    "cheerio": "^1.0.0-rc.12",
-    "node-fetch": "^3.3.2"
-  },
+
   "devDependencies": {
     "@babel/cli": "^7.22.15",
     "@babel/core": "^7.29.0",
@@ -55,6 +53,10 @@
     "@types/jest": "^29.5.4",
     "@types/node": "^20.5.1",
     "@types/socket.io": "^3.0.2",
+    "@types/axios": "^0.14.0",
+    "@types/fluent-ffmpeg": "^2.1.21",
+    "@types/sharp": "^0.32.0",
+    "@types/geoip-lite": "^1.4.2",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",
@@ -77,11 +79,7 @@
     "node.js",
     "express",
     "postgresql",
-    "plagiarism",
-    "plagiarism-detection",
-    "academic-integrity",
-    "code-analysis",
-    "text-similarity"
+
   ],
   "author": "jobbykings",
   "license": "MIT"

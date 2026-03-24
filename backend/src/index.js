@@ -3,45 +3,54 @@ const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
 const { createServer } = require('http');
+
+const { connectRedis } = require('./utils/redis');
 const { initWebsocketService } = require('./services/websocketService');
 const { setSyncWebsocketEmitter } = require('./services/syncService');
+
+const transactionQueue = require('./services/transactionQueue');
+const transactionProcessor = require('./workers/transactionProcessor');
+const transactionEvents = require('./events/transactionEvents');
 
 // Load environment variables
 dotenv.config();
 
-// Import routes
+// Connect to Redis
+connectRedis();
+
+// Helper for default-exported route modules
 const resolveRoute = (routeModule) => routeModule.default || routeModule;
+
+// Import routes
 const quizRoutes = resolveRoute(require('./routes/quizRoutes'));
 const eventLoggerRoutes = resolveRoute(require('./routes/eventLoggerRoutes'));
 const syncRoutes = resolveRoute(require('./routes/syncRoutes'));
+const rbacRoutes = resolveRoute(require('./routes/rbacRoutes'));
 const contentRoutes = require('./routes/content');
 const transactionRoutes = require('./routes/transactions');
+
+// Your branch routes
 const collaborationRoutes = resolveRoute(require('./routes/collaborationRoutes'));
 const holographicRoutes = resolveRoute(require('./routes/holographicRoutes'));
+
+// Upstream routes
+const acoRoutes = require('./routes/aco');
+const federatedLearningRoutes = require('./routes/federatedLearning');
 
 // Initialize Express app
 const app = express();
 const server = createServer(app);
 const websocketService = initWebsocketService(server);
-setSyncWebsocketEmitter((userId, event, data) => websocketService.emitToUser(userId, event, data));
+
+setSyncWebsocketEmitter((userId, event, data) => {
+  websocketService.emitToUser(userId, event, data);
+});
 
 // Middleware
 app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-
-// Global Security Middlewares
-app.use(securityPerformanceTracker);
-app.use(checkBlacklist);
-app.use(ddosProtection);
-app.use(botDetection);
-app.use(advancedRestrictions);
-app.use(requestSanitizer);
-app.use(globalLimiter);
-
-// For authenticated routes, you might want to switch to tieredRateLimiter
-// but globalLimiter works as a safe default for all requests.
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -54,9 +63,12 @@ app.use('/api/quizzes', quizRoutes);
 app.use('/api/events', eventLoggerRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/content', contentRoutes);
+app.use('/api/rbac', rbacRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/collaboration', collaborationRoutes);
 app.use('/api/holographic', holographicRoutes);
+app.use('/api/aco', acoRoutes);
+app.use('/api/federated-learning', federatedLearningRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -64,7 +76,7 @@ app.get('/', (req, res) => {
     message: 'AetherMint Education Backend API',
     version: '1.0.0',
     status: 'running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -73,16 +85,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
-
-// Security Pulse / Status (Admin only)
-app.get('/api/admin/security/pulse', authenticateToken, requireAdmin, async (req, res) => {
-  const pulse = await securityService.getSecurityPulse();
-  res.json({
-    success: true,
-    data: pulse
+    uptime: process.uptime(),
   });
 });
 
@@ -91,7 +94,7 @@ app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
     message: 'Endpoint not found',
-    path: req.originalUrl
+    path: req.originalUrl,
   });
 });
 
@@ -102,25 +105,14 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
 
-// Initialize Transaction Queue System
-const transactionQueue = require('./services/transactionQueue');
-const transactionProcessor = require('./workers/transactionProcessor');
-const transactionEvents = require('./events/transactionEvents');
-
 const PORT = process.env.PORT || 3001;
 
-async function startServer () {
+async function startServer() {
   try {
-    // Initialize transaction system components
-    await transactionQueue.initialize();
-    await transactionProcessor.initialize();
-    await transactionEvents.initialize();
-
-    // Start transaction processing
     await transactionQueue.startProcessing();
     await transactionProcessor.start();
     await transactionEvents.startListening();
@@ -134,6 +126,8 @@ async function startServer () {
       console.log(`💰 Transaction Queue API available at /api/transactions`);
       console.log(`🤝 Collaboration API available at /api/collaboration`);
       console.log(`🔮 Holographic Storage API available at /api/holographic`);
+      console.log(`🧠 ACO API available at /api/aco`);
+      console.log(`🌐 Federated Learning API available at /api/federated-learning`);
       console.log(`🏥 Health check available at /api/health`);
       console.log(`✅ Transaction Queue System initialized successfully`);
     });
