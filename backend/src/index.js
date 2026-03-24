@@ -7,11 +7,25 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Import routes
-const quizRoutes = require('./routes/quizRoutes');
-const eventLoggerRoutes = require('./routes/eventLoggerRoutes');
-const syncRoutes = require('./routes/syncRoutes');
+const quizRoutes = require('./routes/quizRoutes').default || require('./routes/quizRoutes');
+const eventLoggerRoutes = require('./routes/eventLoggerRoutes').default || require('./routes/eventLoggerRoutes');
+const syncRoutes = require('./routes/syncRoutes').default || require('./routes/syncRoutes');
 const contentRoutes = require('./routes/content');
 const transactionRoutes = require('./routes/transactions');
+const authRoutes = require('./routes/auth').default || require('./routes/auth');
+
+// Import Security & Rate Limiting Middlewares
+const { 
+  checkBlacklist, 
+  ddosProtection, 
+  botDetection, 
+  requestSanitizer,
+  advancedRestrictions,
+  securityPerformanceTracker
+} = require('./middleware/security');
+const securityService = require('./services/securityService');
+const { authenticateToken, requireAdmin } = require('./middleware/auth');
+const { globalLimiter, tieredRateLimiter, authLimiter } = require('./middleware/rateLimiter');
 
 // Initialize Express app
 const app = express();
@@ -21,6 +35,18 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Global Security Middlewares
+app.use(securityPerformanceTracker);
+app.use(checkBlacklist);
+app.use(ddosProtection);
+app.use(botDetection);
+app.use(advancedRestrictions);
+app.use(requestSanitizer);
+app.use(globalLimiter);
+
+// For authenticated routes, you might want to switch to tieredRateLimiter
+// but globalLimiter works as a safe default for all requests.
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -34,6 +60,7 @@ app.use('/api/events', eventLoggerRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -51,6 +78,15 @@ app.get('/api/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
+  });
+});
+
+// Security Pulse / Status (Admin only)
+app.get('/api/admin/security/pulse', authenticateToken, requireAdmin, async (req, res) => {
+  const pulse = await securityService.getSecurityPulse();
+  res.json({
+    success: true,
+    data: pulse
   });
 });
 
@@ -128,6 +164,8 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
 
 module.exports = app;
