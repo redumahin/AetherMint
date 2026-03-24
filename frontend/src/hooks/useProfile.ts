@@ -171,11 +171,22 @@ export const useProfile = () => {
       const savedStats = localStorage.getItem('userStats');
       const savedSettings = localStorage.getItem('userSettings');
 
-      setProfile(savedProfile ? JSON.parse(savedProfile) : MOCK_USER);
-      setAchievements(savedAchievements ? JSON.parse(savedAchievements) : MOCK_ACHIEVEMENTS);
-      setCredentials(savedCredentials ? JSON.parse(savedCredentials) : MOCK_CREDENTIALS);
-      setStats(savedStats ? JSON.parse(savedStats) : MOCK_STATS);
-      setSettings(savedSettings ? JSON.parse(savedSettings) : MOCK_SETTINGS);
+      // Safe JSON parsing with fallback
+      const parseJSON = (data: string | null, fallback: any) => {
+        if (!data) return fallback;
+        try {
+          return JSON.parse(data);
+        } catch (error) {
+          console.warn('Failed to parse localStorage data:', error);
+          return fallback;
+        }
+      };
+
+      setProfile(parseJSON(savedProfile, MOCK_USER));
+      setAchievements(parseJSON(savedAchievements, MOCK_ACHIEVEMENTS));
+      setCredentials(parseJSON(savedCredentials, MOCK_CREDENTIALS));
+      setStats(parseJSON(savedStats, MOCK_STATS));
+      setSettings(parseJSON(savedSettings, MOCK_SETTINGS));
     } catch (err) {
       setError('Failed to load profile data');
       console.error('Error loading profile data:', err);
@@ -198,7 +209,12 @@ export const useProfile = () => {
       };
 
       setProfile(updatedProfile);
-      localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+      // Safe localStorage set with error handling
+      try {
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+      } catch (storageError) {
+        console.warn('Failed to save to localStorage:', storageError);
+      }
 
       return {
         success: true,
@@ -221,19 +237,31 @@ export const useProfile = () => {
   // Update achievements
   const updateAchievements = useCallback(async (newAchievements: Achievement[]) => {
     setAchievements(newAchievements);
-    localStorage.setItem('userAchievements', JSON.stringify(newAchievements));
+    try {
+      localStorage.setItem('userAchievements', JSON.stringify(newAchievements));
+    } catch (storageError) {
+      console.warn('Failed to save achievements to localStorage:', storageError);
+    }
   }, []);
 
   // Update credentials
   const updateCredentials = useCallback(async (newCredentials: Credential[]) => {
     setCredentials(newCredentials);
-    localStorage.setItem('userCredentials', JSON.stringify(newCredentials));
+    try {
+      localStorage.setItem('userCredentials', JSON.stringify(newCredentials));
+    } catch (storageError) {
+      console.warn('Failed to save credentials to localStorage:', storageError);
+    }
   }, []);
 
   // Update settings
   const updateSettings = useCallback(async (newSettings: ProfileSettings) => {
     setSettings(newSettings);
-    localStorage.setItem('userSettings', JSON.stringify(newSettings));
+    try {
+      localStorage.setItem('userSettings', JSON.stringify(newSettings));
+    } catch (storageError) {
+      console.warn('Failed to save settings to localStorage:', storageError);
+    }
   }, []);
 
   // Add new credential
@@ -290,7 +318,11 @@ export const useProfile = () => {
       };
 
       setStats(newStats);
-      localStorage.setItem('userStats', JSON.stringify(newStats));
+      try {
+        localStorage.setItem('userStats', JSON.stringify(newStats));
+      } catch (storageError) {
+        console.warn('Failed to save stats to localStorage:', storageError);
+      }
     } catch (error) {
       console.error('Error refreshing stats:', error);
       setError('Failed to refresh statistics');

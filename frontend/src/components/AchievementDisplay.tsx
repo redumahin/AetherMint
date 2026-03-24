@@ -79,18 +79,20 @@ export function AchievementDisplay({
 
   // Get unique categories and rarities
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(achievements.map(a => a.category)));
+    const achs = achievements || [];
+    const cats = Array.from(new Set(achs.map(a => a.category)));
     return ['all', ...cats];
   }, [achievements]);
 
   const rarities = useMemo(() => {
-    const rars = Array.from(new Set(achievements.map(a => a.rarity)));
+    const achs = achievements || [];
+    const rars = Array.from(new Set(achs.map(a => a.rarity)));
     return ['all', ...rars];
   }, [achievements]);
 
   // Filter achievements
   const filteredAchievements = useMemo(() => {
-    return achievements.filter(achievement => {
+    return (achievements || []).filter(achievement => {
       // Search filter
       if (searchQuery && !achievement.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !achievement.description.toLowerCase().includes(searchQuery.toLowerCase())) {
