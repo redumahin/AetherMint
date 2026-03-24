@@ -104,7 +104,7 @@ export function CredentialList({
 
   // Filter credentials
   const filteredCredentials = useMemo(() => {
-    return credentials.filter(credential => {
+    return (credentials || []).filter(credential => {
       // Search filter
       if (searchQuery && !credential.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !credential.issuer.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -128,10 +128,11 @@ export function CredentialList({
 
   // Statistics
   const stats = useMemo(() => {
-    const total = credentials.length;
-    const verified = credentials.filter(c => c.verificationStatus === 'verified').length;
-    const pending = credentials.filter(c => c.verificationStatus === 'pending').length;
-    const expired = credentials.filter(c => c.verificationStatus === 'expired').length;
+    const creds = credentials || [];
+    const total = creds.length;
+    const verified = creds.filter(c => c.verificationStatus === 'verified').length;
+    const pending = creds.filter(c => c.verificationStatus === 'pending').length;
+    const expired = creds.filter(c => c.verificationStatus === 'expired').length;
 
     return { total, verified, pending, expired };
   }, [credentials]);
