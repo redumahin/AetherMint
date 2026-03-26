@@ -32,6 +32,9 @@ mod courseMetadata_test;
 #[cfg(test)]
 mod syncCoordination_test;
 pub mod utils;
+pub mod dynamic_fees;
+#[cfg(test)]
+mod dynamic_fees_test;
 
 
 /// Optimized user profile with packed storage
@@ -156,7 +159,7 @@ pub struct AetherMintContract;
 
 #[contractimpl]
 impl AetherMintContract {
-    /// Initialize the contract with optimized storage
+    /// Initialize the contract with optimized storage and fee system
     pub fn initialize(env: Env, admin: Address) {
         if env.storage().instance().has(&DataKey::Admin) {
             panic!("Contract already initialized");
@@ -166,9 +169,12 @@ impl AetherMintContract {
         env.storage().instance().set(&DataKey::CredentialCount, &0u64);
         env.storage().instance().set(&DataKey::CourseCount, &0u64);
         env.storage().instance().set(&DataKey::AchievementCount, &0u64);
+        
+        // Initialize dynamic fee system
+        dynamic_fees::DynamicFeeContract::initialize(env.clone(), admin.clone());
     }
 
-    /// Issue a new credential with optimized storage
+    /// Issue a new credential with dynamic fee calculation
     pub fn issue_credential(
         env: Env,
         issuer: Address,
@@ -185,6 +191,22 @@ impl AetherMintContract {
         if issuer != admin {
             panic!("Only admin can issue credentials");
         }
+
+        // Calculate and validate fee
+        let fee_calculation = dynamic_fees::DynamicFeeContract::calculate_fee(
+            env.clone(),
+            issuer.clone(),
+            10000, // Standard credential issuance value
+            "credential_issuance".into_val(&env),
+        );
+
+        // Update user metrics for successful transaction
+        dynamic_fees::DynamicFeeContract::update_user_metrics(
+            env.clone(),
+            issuer.clone(),
+            true,
+            10000,
+        );
 
         let count: u64 = env.storage().instance()
             .get(&DataKey::CredentialCount)
@@ -237,46 +259,6 @@ impl AetherMintContract {
         env.storage().instance()
             .get(&DataKey::Credential(credential_id))
             .unwrap_or_else(|| panic!("Credential not found"))
-    }
-
-    /// Create a new course with optimized storage
-    pub fn create_course(
-        env: Env,
-        instructor: Address,
-        title: String,
-        description: String,
-        price: u64,
-    ) -> String {
-        let admin: Address = env.storage().instance()
-            .get(&DataKey::Admin)
-            .unwrap_or_else(|| panic!("Admin not found"));
-
-        if instructor != admin {
-            panic!("Only admin can create courses");
-        }
-
-        let course_count: u64 = env.storage().instance()
-            .get(&DataKey::CourseCount)
-            .unwrap_or(0);
-        
-        let course_id = format!("course_{}", course_count + 1);
-        
-        // Pack flags - bit 0 = active status
-        let flags = 1u8; // Active = true
-
-        let course = Course {
-            id: course_id.clone(),
-            instructor: instructor.clone(),
-            title,
-            description,
-            price,
-            flags,
-        };
-
-        env.storage().instance().set(&DataKey::Course(course_id.clone()), &course);
-        env.storage().instance().set(&DataKey::CourseCount, &(course_count + 1));
-
-        course_id
     }
 
     /// Get user profile with optimized storage
@@ -409,5 +391,118 @@ impl AetherMintContract {
     /// Batch update expiration status for multiple credentials
     pub fn batch_update_expiration_status(env: Env, credential_ids: Vec<u64>) -> Vec<u64> {
         credential_registry::batch_update_expiration_status(&env, credential_ids)
+    }
+
+    // ===== Dynamic Fee System Integration =====
+
+    /// Get current transaction fee for user
+    pub fn get_transaction_fee(env: Env, user: Address, transaction_value: u64) -> u64 {
+        dynamic_fees::DynamicFeeContract::get_current_fee(env, user, transaction_value)
+    }
+
+    /// Get user's current fee discount tier
+    pub fn get_fee_discount_tier(env: Env, user: Address) -> dynamic_fees::FeeDiscountTier {
+        dynamic_fees::DynamicFeeContract::get_user_discount_tier(env, user)
+    }
+
+    /// Get comprehensive fee report for user
+    pub fn get_fee_report(env: Env, user: Address) -> String {
+        dynamic_fees::DynamicFeeContract::get_fee_report(env, user)
+    }
+
+    /// Update network metrics for fee calculation
+    pub fn update_network_metrics(env: Env, network_metrics: dynamic_fees::NetworkMetrics) {
+        let admin: Address = env.storage().instance()
+            .get(&DataKey::Admin)
+            .unwrap_or_else(|| panic!("Admin not found"));
+        
+        // Only admin can update network metrics
+        // In production, this would be called by an oracle or trusted source
+        dynamic_fees::DynamicFeeContract::update_network_metrics(env, network_metrics);
+    }
+
+    /// Issue incentive reward to user
+    pub fn issue_incentive_reward(
+        env: Env,
+        admin: Address,
+        user: Address,
+        reward_type: dynamic_fees::RewardType,
+        amount: u64,
+        reason: String,
+        duration_seconds: u64,
+    ) -> u64 {
+        let contract_admin: Address = env.storage().instance()
+            .get(&DataKey::Admin)
+            .unwrap_or_else(|| panic!("Admin not found"));
+
+        if admin != contract_admin {
+            panic!("Only admin can issue rewards");
+        }
+
+        dynamic_fees::DynamicFeeContract::issue_reward(
+            env,
+            admin,
+            user,
+            reward_type,
+            amount,
+            reason,
+            duration_seconds,
+        )
+    }
+
+    /// Create a new course with dynamic fee calculation
+    pub fn create_course(
+        env: Env,
+        instructor: Address,
+        title: String,
+        description: String,
+        price: u64,
+    ) -> String {
+        let admin: Address = env.storage().instance()
+            .get(&DataKey::Admin)
+            .unwrap_or_else(|| panic!("Admin not found"));
+
+        if instructor != admin {
+            panic!("Only admin can create courses");
+        }
+
+        // Calculate and validate fee for course creation
+        let fee_calculation = dynamic_fees::DynamicFeeContract::calculate_fee(
+            env.clone(),
+            instructor.clone(),
+            price,
+            "course_creation".into_val(&env),
+        );
+
+        // Update user metrics for successful transaction
+        dynamic_fees::DynamicFeeContract::update_user_metrics(
+            env.clone(),
+            instructor.clone(),
+            true,
+            price,
+        );
+
+        let course_count: u64 = env.storage().instance()
+            .get(&DataKey::CourseCount)
+            .unwrap_or(0);
+        
+        let course_id = format!("course_{}", course_count + 1);
+        
+        // Pack flags - bit 0 = active status
+        let flags = 1u8; // Active = true
+
+        let course = Course {
+            id: course_id.clone(),
+            instructor: instructor.clone(),
+            title,
+            description,
+            price,
+            flags,
+        };
+
+        env.storage().instance().set(&DataKey::Course(course_id.clone()), &course);
+        env.storage().instance().set(&DataKey::CourseCount, &(course_count + 1));
+
+        course_id
     }
 }
