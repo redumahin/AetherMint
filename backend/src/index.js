@@ -36,6 +36,8 @@ const acoRoutes = require('./routes/aco');
 const federatedLearningRoutes = require('./routes/federatedLearning');
 const predictionRoutes = require('./routes/prediction');
 const analyticsRoutes = require('./routes/analytics');
+const tenantRoutes = require('./routes/tenants');
+const tenantAnalyticsRoutes = require('./routes/tenantAnalytics');
 
 
 // Initialize Express app
@@ -79,6 +81,8 @@ app.use('/api/aco', acoRoutes);
 app.use('/api/federated-learning', federatedLearningRoutes);
 app.use('/api/prediction', predictionRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/tenants', tenantRoutes);
+app.use('/api/analytics/tenants', tenantAnalyticsRoutes);
 
 
 // Root endpoint
