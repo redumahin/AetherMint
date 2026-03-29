@@ -118,6 +118,10 @@ app.use('/api/gamification', gamificationRoutes);
 const bridgeRoutes = require('./routes/bridge');
 app.use('/api/bridge', bridgeRoutes);
 
+// Time-Locked Credential routes
+const timeLockCredentialsRoutes = require('./routes/timeLockCredentials');
+app.use('/api/time-lock', timeLockCredentialsRoutes);
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({

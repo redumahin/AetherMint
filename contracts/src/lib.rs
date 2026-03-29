@@ -10,6 +10,10 @@ pub mod dynamic_nft;
 #[cfg(test)]
 mod dynamic_nft_test;
 
+pub mod time_lock_credential;
+#[cfg(test)]
+mod time_lock_credential_test;
+
 pub mod progress;
 pub mod event_logger;
 pub mod user_profile;
