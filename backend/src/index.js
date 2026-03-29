@@ -126,6 +126,10 @@ app.use('/api/time-lock', timeLockCredentialsRoutes);
 const vrfRoutes = require('./routes/vrf');
 app.use('/api/vrf', vrfRoutes);
 
+// Real-time Translation routes
+const translationRoutes = require('./routes/translation');
+app.use('/api/translate', translationRoutes);
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
