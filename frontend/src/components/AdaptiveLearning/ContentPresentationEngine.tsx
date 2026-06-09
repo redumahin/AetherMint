@@ -72,15 +72,17 @@ const CONTENT_TYPE_ICONS = {
   'hands-on': Brain
 };
 
+interface LearningStyleAdaptations {
+  textSize: number;
+  mediaEnrichment: number;
+  interactivityLevel: number;
+  socialElements: number;
+}
+
 const LEARNING_STYLE_PREFERENCES: Record<LearningStyle, {
   preferredTypes: ContentType[];
   presentationMode: PresentationMode;
-  adaptations: {
-    textSize: number;
-    mediaEnrichment: number;
-    interactivityLevel: number;
-    socialElements: number;
-  };
+  adaptations: LearningStyleAdaptations;
 }> = {
   visual: {
     preferredTypes: ['visual', 'video', 'interactive'],

@@ -3,7 +3,7 @@
  * Manages user's personalized learning profiles, neural characteristics, and adaptive settings
  */
 
-import type { LearningProfile, NeuralPattern } from '../types/nanotech';
+import type { LearningProfile, NeuralPattern } from '../../types/nanotech';
 
 /**
  * Singleton instance
@@ -93,7 +93,8 @@ class LearningProfileService {
       totalSkillsAcquired: 0,
       totalTransferTime: 0,
       successRate: 0.8,
-      recommendedNextSkills: []
+      recommendedNextSkills: [],
+      estimatedTimeForMastery: {}
     };
 
     this.profiles.set(userId, profile);

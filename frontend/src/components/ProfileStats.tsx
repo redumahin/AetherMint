@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 interface ProfileStatsProps {
-  stats: ProfileStatsType;
+  stats: ProfileStatsType | null;
   showRanking?: boolean;
   showProgress?: boolean;
   compact?: boolean;

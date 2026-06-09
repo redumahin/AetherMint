@@ -4,7 +4,7 @@
  * Handles deployment, coordination, mission planning, and nanobot lifecycle
  */
 
-import type { Nanobot, NanobotSwarm } from '../types/nanotech';
+import type { Nanobot, NanobotSwarm } from '../../types/nanotech';
 
 /**
  * Singleton instance
@@ -369,10 +369,10 @@ class NanobotControllerService {
       return null;
     }
 
-    const totalHealth = swarm.nanobots.reduce((sum, nb) => sum + nb.healthLevel, 0);
-    const totalEnergy = swarm.nanobots.reduce((sum, nb) => sum + nb.energyLevel, 0);
-    const totalTasks = swarm.nanobots.reduce((sum, nb) => sum + nb.tasksCompleted, 0);
-    const totalErrors = swarm.nanobots.reduce((sum, nb) => sum + nb.errorCount, 0);
+    const totalHealth = swarm.nanobots.reduce((sum: number, nb: Nanobot) => sum + nb.healthLevel, 0);
+    const totalEnergy = swarm.nanobots.reduce((sum: number, nb: Nanobot) => sum + nb.energyLevel, 0);
+    const totalTasks = swarm.nanobots.reduce((sum: number, nb: Nanobot) => sum + nb.tasksCompleted, 0);
+    const totalErrors = swarm.nanobots.reduce((sum: number, nb: Nanobot) => sum + nb.errorCount, 0);
 
     return {
       totalNanobots: swarm.totalCount,

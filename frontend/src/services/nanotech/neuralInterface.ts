@@ -4,13 +4,13 @@
  * Monitors neural activity, maps neural pathways, and detects learning patterns
  */
 
-import type { NeuralPattern } from '../types/nanotech';
+import type { NeuralPattern } from '../../types/nanotech';
 import {
   generateNeuralPattern,
   evolveNeuralPattern,
   calculatePatternSimilarity,
   detectLearningState
-} from '../utils/neuralSimulation';
+} from '../../utils/neuralSimulation';
 
 /**
  * Singleton instance
@@ -263,7 +263,7 @@ class NeuralInterfaceService {
     const mapping = categoryMappings[skillCategory] || categoryMappings['memory'];
 
     // Create activation map based on current pattern
-    const activationMap = this.currentPattern.neuronActivation.map((activation, index) => {
+    const activationMap = this.currentPattern.neuronActivation.map((activation: number, index: number) => {
       const distance = Math.abs(index - mapping.center);
       const relativeActivation = Math.max(0, 1 - (distance / (mapping.spread * 2)));
 

@@ -8,8 +8,8 @@ export function testNullHandling() {
   console.log('Testing null/undefined handling...');
   
   // Test with empty arrays
-  const emptyAchievements = [];
-  const emptyCredentials = [];
+  const emptyAchievements: Array<{category: string; rarity: string}> = [];
+  const emptyCredentials: Array<{verificationStatus: string}> = [];
   
   // Test AchievementDisplay with empty data
   try {
