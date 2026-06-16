@@ -115,7 +115,7 @@ router.post(
       .isBoolean()
       .withMessage("Prefer low latency must be a boolean"),
   ],
-  validateRequest,
+  handleValidationErrors,
   controller.optimizeContent.bind(controller) as RequestHandler,
 );
 
@@ -142,7 +142,7 @@ router.get(
       .isInt({ min: 1, max: 1000 })
       .withMessage("Limit must be an integer between 1 and 1000"),
   ],
-  validateRequest,
+  handleValidationErrors,
   controller.getHistory.bind(controller) as RequestHandler,
 );
 
@@ -217,7 +217,7 @@ router.put(
         "Optimization timeout must be an integer between 5 and 300 seconds",
       ),
   ],
-  validateRequest,
+  handleValidationErrors,
   controller.updateConfiguration.bind(controller) as RequestHandler,
 );
 
@@ -234,7 +234,7 @@ router.delete(
       .isString()
       .withMessage("Request ID must be a string"),
   ],
-  validateRequest,
+  handleValidationErrors,
   controller.cancelOptimization.bind(controller) as RequestHandler,
 );
 
@@ -265,7 +265,7 @@ router.get(
       .isISO8601()
       .withMessage("End date must be a valid ISO 8601 date"),
   ],
-  validateRequest,
+  handleValidationErrors,
   controller.getAnalyticsReport.bind(controller) as RequestHandler,
 );
 

@@ -52,11 +52,12 @@ export const authMiddleware = async (
 
 export const requireRole = (roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
+    const user = req.user as { role: UserRole } | undefined;
+    if (!user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(user.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
